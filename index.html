@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crystal Miner Deluxe</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #e0f7fa;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 5px;
+    text-shadow: 0 0 8px #80deea;
+  }
+  #game {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 20px;
+    width: 380px;
+    box-shadow: 0 0 15px #00acc1;
+  }
+  #crystalCount {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 20px 0;
+    text-align: center;
+    user-select: none;
+  }
+  #mineBtn {
+    display: block;
+    margin: 0 auto 20px;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    color: #004d40;
+    background: #00bfa5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 12px #00bfa5;
+    transition: background 0.3s;
+    user-select: none;
+  }
+  #mineBtn:hover {
+    background: #008e76;
+  }
+  .upgrade {
+    background: #004d40;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 6px #00796b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .upgrade.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .upgrade > div {
+    flex: 1;
+  }
+  .upgrade button {
+    background: #00796b;
+    border: none;
+    padding: 6px 12px;
+    color: #a7ffeb;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+  }
+  .upgrade button:hover:enabled {
+    background: #004d40;
+  }
+  .upgrade button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  #levelInfo {
+    margin-top: 10px;
+    font-size: 1rem;
+    text-align: center;
+    text-shadow: 0 0 4px #80deea;
+    user-select: none;
+  }
+  #progressBarContainer {
+    background: #004d40;
+    border-radius: 8px;
+    height: 22px;
+    margin-top: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 0 6px #00796b;
+  }
+  #progressBar {
+    height: 100%;
+    background: #00bfa5;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  #prestigeContainer {
+    margin-top: 25px;
+    text-align: center;
+  }
+  #prestigeBtn {
+    background: #d84315;
+    border: none;
+    padding: 12px 20px;
+    color: #fff3e0;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff5722;
+    user-select: none;
+    transition: background 0.3s;
+  }
+  #prestigeBtn:hover:enabled {
+    background: #bf360c;
+  }
+  #prestigeBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  #prestigeInfo {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #ffccbc;
+    user-select: none;
+  }
+  #indicators {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #80deea;
+    user-select: none;
+  }
+  #indicators div {
+    margin: 5px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Crystal Miner Deluxe</h1>
+
+<div id="game">
+  <div id="crystalCount">0 Crystals</div>
+  <button id="mineBtn">Mine Crystal</button>
+
+  <div class="upgrade" id="clickUpgrade">
+    <div>Upgrade Click Power (Cost: <span id="clickUpgradeCost">10</span>)</div>
+    <button id="buyClickUpgrade">Buy</button>
+  </div>
+
+  <div class="upgrade" id="autoMinerUpgrade">
+    <div>Buy Auto Miner (Cost: <span id="autoMinerCost">50</span>)</div>
+    <button id="buyAutoMiner">Buy</button>
+  </div>
+
+  <div class="upgrade" id="bonusChanceUpgrade">
+    <div>Bonus Crystal Chance +5% (Cost: <span id="bonusChanceCost">200</span>)</div>
+    <button id="buyBonusChance">Buy</button>
+  </div>
+
+  <div class="upgrade" id="clickMultiplierUpgrade">
+    <div>Click Multiplier x2 (Cost: <span id="clickMultiplierCost">1000</span>)</div>
+    <button id="buyClickMultiplier">Buy</button>
+  </div>
+
+  <div class="upgrade" id="autoMinerMultiplierUpgrade">
+    <div>Auto Miner Multiplier x2 (Cost: <span id="autoMinerMultiplierCost">5000</span>)</div>
+    <button id="buyAutoMinerMultiplier">Buy</button>
+  </div>
+
+  <div id="levelInfo">
+    Level: 1 | Total Crystals Mined: 0<br />
+    Level Boost: +0%  
+  </div>
+
+  <div id="progressBarContainer">
+    <div id="progressBar"></div>
+  </div>
+
+  <div id="indicators">
+    <div>Prestige Points: <span id="prestigePoints">0</span></div>
+    <div>Prestige Boost: +0% Click & Auto Power</div>
+    <div>Prestige Cost: <span id="prestigeCost">5000</span> Crystals</div>
+  </div>
+
+  <div id="prestigeContainer">
+    <button id="prestigeBtn" disabled>Prestige (Reset for Boost)</button>
+  </div>
+</div>
+
+<footer>Made with ❤️ by ChatGPT</footer>
+
+<script>
+  // Helper: Format numbers with suffixes
+  function formatNumber(num) {
+    if (num < 1000) return num.toFixed(0);
+    const units = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
+    let unitIndex = -1;
+    while (num >= 1000 && unitIndex < units.length - 1) {
+      num /= 1000;
+      unitIndex++;
+    }
+    return num.toFixed(2) + units[unitIndex];
+  }
+
+  // Game State
+  let crystals = 0;
+  let totalMined = 0;
+  let clickPower = 1;
+  let clickUpgradeCost = 10;
+  let autoMinerCount = 0;
+  let autoMinerCost = 50;
+  let autoMinerPower = 1;
+  let level = 1;
+
+  // Level up requirements ramp (exponential)
+  const baseLevelUpThreshold = 100;
+  function getLevelUpThreshold(lv) {
+    return baseLevelUpThreshold * Math.pow(1.4, lv - 1);
+  }
+
+  // New mechanics
+  let bonusCrystalChance = 0; // % chance per click for bonus crystals
+  let bonusCrystalAmount = 5;
+  let clickMultiplier = 1;
+  let clickMultiplierCost = 1000;
+  let autoMinerMultiplier = 1;
+  let autoMinerMultiplierCost = 5000;
+
+  // Prestige
+  let prestigePoints = 0;
+  const basePrestigeThreshold = 5000;
+  function getPrestigeThreshold(pp) {
+    return basePrestigeThreshold * Math.pow(2, pp); // doubles every prestige point owned
+  }
+
+  // DOM Elements
+  const crystalCountEl = document.getElementById('crystalCount');
+  const mineBtn = document.getElementById('mineBtn');
+
+  const clickUpgradeCostEl = document.getElementById('clickUpgradeCost');
+  const buyClickUpgradeBtn = document.getElementById('buyClickUpgrade');
+
+  const autoMinerCostEl = document.getElementById('autoMinerCost');
+  const buyAutoMinerBtn = document.getElementById('buyAutoMiner');
+
+  const bonusChanceCostEl = document.getElementById('bonusChanceCost');
+  const buyBonusChanceBtn = document.getElementById('buyBonusChance');
+
+  const clickMultiplierCostEl = document.getElementById('clickMultiplierCost');
+  const buyClickMultiplierBtn = document.getElementById('buyClickMultiplier');
+
+  const autoMinerMultiplierCostEl = document.getElementById('autoMinerMultiplierCost');
+  const buyAutoMinerMultiplierBtn = document.getElementById('buyAutoMinerMultiplier');
+
+  const levelInfoEl = document.getElementById('levelInfo');
+  const progressBar = document.getElementById('progressBar');
+
+  const prestigeBtn = document.getElementById('prestigeBtn');
+  const prestigePointsEl = document.getElementById('prestigePoints');
+  const prestigeCostEl = document.getElementById('prestigeCost');
+  const indicators = document.getElementById('indicators');
+
+  // Update UI function
+  function updateUI() {
+    crystalCountEl.textContent = `${formatNumber(crystals)} Crystals`;
+    clickUpgradeCostEl.textContent = formatNumber(clickUpgradeCost);
+    autoMinerCostEl.textContent = formatNumber(autoMinerCost);
+    bonusChanceCostEl.textContent = formatNumber(200 * Math.pow(2, bonusCrystalChance / 5));
+    clickMultiplierCostEl.textContent = formatNumber(clickMultiplierCost);
+    autoMinerMultiplierCostEl.textContent = formatNumber(autoMinerMultiplierCost);
+
+    buyClickUpgradeBtn.disabled = crystals < clickUpgradeCost;
+    buyAutoMinerBtn.disabled = crystals < autoMinerCost;
+    buyBonusChanceBtn.disabled = crystals < (200 * Math.pow(2, bonusCrystalChance / 5));
+    buyClickMultiplierBtn.disabled = crystals < clickMultiplierCost;
+    buyAutoMinerMultiplierBtn.disabled = crystals < autoMinerMultiplierCost;
+
+    prestigeBtn.disabled = crystals < getPrestigeThreshold(prestigePoints);
+
+    prestigePointsEl.textContent = prestigePoints;
+    prestigeCostEl.textContent = formatNumber(getPrestigeThreshold(prestigePoints));
+
+    // Level info and boost
+    const levelBoostPercent = ((prestigePoints * 10) + (level -1) * 10).toFixed(0);
+    levelInfoEl.innerHTML =
+      `Level: ${level} | Total Crystals Mined: ${formatNumber(totalMined)}<br />` +
+      `Level Boost: +${levelBoostPercent}%`;
+
+    // Progress bar update
+    let lvlThresh = getLevelUpThreshold(level);
+    let prevLvlThresh = level > 1 ? getLevelUpThreshold(level - 1) : 0;
+    let progressPercent = ((totalMined - prevLvlThresh) / (lvlThresh - prevLvlThresh)) * 100;
+    progressPercent = Math.min(Math.max(progressPercent, 0), 100);
+    progressBar.style.width = progressPercent + '%';
+
+    // Prestige boost indicator
+    const prestigeBoostText = `Prestige Boost: +${(prestigePoints * 10).toFixed(0)}% Click & Auto Power`;
+    indicators.children[1].textContent = prestigeBoostText;
+  }
+
+  // Mine crystal function (on click)
+  function mineCrystal() {
+    // Calculate level + prestige boost multiplier
+    const totalBoost = 1 + (prestigePoints * 0.10) + ((level - 1) * 0.10);
+    // Base crystals from click
+    let gained = clickPower * clickMultiplier * totalBoost;
+    crystals += gained;
+    totalMined += gained;
+
+    // Bonus chance
+    if (Math.random() < bonusCrystalChance / 100) {
+      crystals += bonusCrystalAmount * totalBoost;
+      totalMined += bonusCrystalAmount * totalBoost;
+      flashBonus();
+    }
+    checkLevelUp();
+    updateUI();
+  }
+
+  // Visual flash for bonus crystals
+  function flashBonus() {
+    crystalCountEl.style.color = '#ffeb3b';
+    setTimeout(() => {
+      crystalCountEl.style.color = '#e0f7fa';
+    }, 400);
+  }
+
+  // Buy Click Upgrade
+  function buyClickUpgrade() {
+    if (crystals >= clickUpgradeCost) {
+      crystals -= clickUpgradeCost;
+      clickPower *= 1.5;
+      clickUpgradeCost = Math.ceil(clickUpgradeCost * 1.7);
+      updateUI();
+    }
+  }
+
+  // Buy Auto Miner
+  function buyAutoMiner() {
+    if (crystals >= autoMinerCost) {
+      crystals -= autoMinerCost;
+      autoMinerCount += 1;
+      autoMinerCost = Math.ceil(autoMinerCost * 2);
+      updateUI();
+    }
+  }
+
+  // Buy Bonus Crystal Chance Upgrade (+5% chance)
+  function buyBonusChance() {
+    let cost = 200 * Math.pow(2, bonusCrystalChance / 5);
+    if (crystals >= cost) {
+      crystals -= cost;
+      bonusCrystalChance += 5;
+      updateUI();
+    }
+  }
+
+  // Buy Click Multiplier x2
+  function buyClickMultiplier() {
+    if (crystals >= clickMultiplierCost) {
+      crystals -= clickMultiplierCost;
+      clickMultiplier *= 2;
+      clickMultiplierCost *= 4;
+      updateUI();
+    }
+  }
+
+  // Buy Auto Miner Multiplier x2
+  function buyAutoMinerMultiplier() {
+    if (crystals >= autoMinerMultiplierCost) {
+      crystals -= autoMinerMultiplierCost;
+      autoMinerMultiplier *= 2;
+      autoMinerMultiplierCost *= 4;
+      updateUI();
+    }
+  }
+
+  // Auto Miner produces crystals every second
+  function autoMine() {
+    const totalBoost = 1 + (prestigePoints * 0.10) + ((level - 1) * 0.10);
+    let gained = autoMinerCount * autoMinerPower * autoMinerMultiplier * totalBoost;
+    crystals += gained;
+    totalMined += gained;
+    checkLevelUp();
+    updateUI();
+  }
+
+  // Level up when total mined reaches threshold
+  function checkLevelUp() {
+    let lvlThresh = getLevelUpThreshold(level);
+    if (totalMined >= lvlThresh) {
+      level++;
+      // On level up boost clickPower and autoMinerPower by 10%
+      clickPower *= 1.1;
+      autoMinerPower *= 1.1;
+      // Visual flash effect
+      crystalCountEl.style.color = '#ffd600';
+      setTimeout(() => {
+        crystalCountEl.style.color = '#e0f7fa';
+      }, 500);
+    }
+  }
+
+  // Prestige mechanic: reset progress for permanent boost
+  function prestige() {
+    let cost = getPrestigeThreshold(prestigePoints);
+    if (crystals < cost) return;
+    prestigePoints++;
+    crystals = 0;
+    totalMined = 0;
+    clickPower = 1 * (1 + prestigePoints * 0.10);
+    autoMinerCount = 0;
+    autoMinerPower = 1 * (1 + prestigePoints * 0.10);
+    level = 1;
+    clickUpgradeCost = 10;
+    autoMinerCost = 50;
+    bonusCrystalChance = 0;
+    clickMultiplier = 1;
+    clickMultiplierCost = 1000;
+    autoMinerMultiplier = 1;
+    autoMinerMultiplierCost = 5000;
+    updateUI();
+  }
+
+  // Event Listeners
+  mineBtn.addEventListener('click', mineCrystal);
+  buyClickUpgradeBtn.addEventListener('click', buyClickUpgrade);
+  buyAutoMinerBtn.addEventListener('click', buyAutoMiner);
+  buyBonusChanceBtn.addEventListener('click', buyBonusChance);
+  buyClickMultiplierBtn.addEventListener('click', buyClickMultiplier);
+  buyAutoMinerMultiplierBtn.addEventListener('click', buyAutoMinerMultiplier);
+  prestigeBtn.addEventListener('click', prestige);
+
+  // Auto mine interval every 1 second
+  setInterval(autoMine, 1000);
+
+  updateUI();
+</script>
+
+</body>
+</html>
